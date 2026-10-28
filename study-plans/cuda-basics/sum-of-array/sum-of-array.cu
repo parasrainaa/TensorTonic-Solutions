@@ -20,7 +20,7 @@ __syncthreads();                             // then everyone waits
 
 extern "C" void solve(const float* input, float* result, int N) {
     int threads = 256;
-    int blocks = 160;
+    int blocks = 144;
     cudaMemset(result, 0, sizeof(float));
     sum_kernel<<<blocks, threads>>>(input, result, N);
     cudaDeviceSynchronize();
