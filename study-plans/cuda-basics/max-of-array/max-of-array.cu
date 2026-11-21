@@ -14,7 +14,7 @@ __device__ float atomicMaxFloat(float* addr, float val) {
 }
 __global__ void max_kernel(const float* input, float* result, int N) {
     // Write code here
-    __shared__ float s[256];
+    __shared__ float s[512];
     int tid = threadIdx.x;
     float m = -FLT_MAX;
     for(int i = blockDim.x * blockIdx.x + tid; i < N; i += blockDim.x * gridDim.x){
@@ -31,12 +31,10 @@ __global__ void max_kernel(const float* input, float* result, int N) {
 }
 
 extern "C" void solve(const float* input, float* result, int N) {
-    int threads = 256;
+    int threads = 512;
     int blocks = (N + threads - 1) / threads;
     float neg_inf = -FLT_MAX;
     cudaMemcpy(result, &neg_inf, sizeof(float), cudaMemcpyHostToDevice);
     max_kernel<<<blocks, threads>>>(input, result, N);
     cudaDeviceSynchronize();
 }
-// create a result array. 
-// i think one other way i can get max, is by creating a shared array of size of threads per block, and then storing each value inside the block, and then use tree reduction to get the minimum updated to the 0 index, and then do atomicmax function to get the max value here
