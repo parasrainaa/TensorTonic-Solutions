@@ -40,5 +40,5 @@ extern "C" void solve(const float* input, float* result, int N) {
 
     init_kernel<<<1, 1>>>(result);
     max_kernel<<<blocks, threads>>>(input, result, N);
-    cudaDeviceSynchronize();
+    // cudaDeviceSynchronize();
 }
