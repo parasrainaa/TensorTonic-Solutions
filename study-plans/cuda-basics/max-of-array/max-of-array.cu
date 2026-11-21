@@ -32,7 +32,7 @@ __global__ void max_kernel(const float* input, float* result, int N) {
 
 extern "C" void solve(const float* input, float* result, int N) {
     int threads = 256;
-    int blocks = 160;
+    int blocks = 140;
     float neg_inf = -FLT_MAX;
     cudaMemcpy(result, &neg_inf, sizeof(float), cudaMemcpyHostToDevice);
     max_kernel<<<blocks, threads>>>(input, result, N);
