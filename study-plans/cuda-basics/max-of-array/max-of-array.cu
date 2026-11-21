@@ -36,5 +36,5 @@ extern "C" void solve(const float* input, float* result, int N) {
     float neg_inf = -FLT_MAX;
     cudaMemcpy(result, &neg_inf, sizeof(float), cudaMemcpyHostToDevice);
     max_kernel<<<blocks, threads>>>(input, result, N);
-    cudaDeviceSynchronize();
+    // cudaDeviceSynchronize();
 }
