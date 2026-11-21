@@ -14,7 +14,7 @@ __device__ float atomicMaxFloat(float* addr, float val) {
 }
 __global__ void max_kernel(const float* input, float* result, int N) {
     // Write code here
-    __shared__ float s[512];
+    __shared__ float s[256];
     int tid = threadIdx.x;
     float m = -FLT_MAX;
     for(int i = blockDim.x * blockIdx.x + tid; i < N; i += blockDim.x * gridDim.x){
@@ -31,8 +31,8 @@ __global__ void max_kernel(const float* input, float* result, int N) {
 }
 
 extern "C" void solve(const float* input, float* result, int N) {
-    int threads = 512;
-    int blocks = (N + threads - 1) / threads;
+    int threads = 256;
+    int blocks = 8;
     float neg_inf = -FLT_MAX;
     cudaMemcpy(result, &neg_inf, sizeof(float), cudaMemcpyHostToDevice);
     max_kernel<<<blocks, threads>>>(input, result, N);
