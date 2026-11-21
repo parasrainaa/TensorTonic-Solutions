@@ -33,9 +33,16 @@ __global__ void max_kernel(const float* __restrict__ input, float* result, int N
     // Phase 1a: main body, 16 bytes per load
     const float4* in4 = reinterpret_cast<const float4*>(input);
     int N4 = N >> 2;
-    float m = -FLT_MAX;
-    for (int i = gtid; i < N4; i += stride)
-        m = fmaxf(m, max4(in4[i]));
+    float m0 = -FLT_MAX, m1 = -FLT_MAX;      // two independent chains
+    int i = gtid;
+    for (; i + stride < N4; i += 2 * stride) {
+        float4 a = in4[i];                    // both loads issued
+        float4 b = in4[i + stride];           // before either is used
+        m0 = fmaxf(m0, max4(a));
+        m1 = fmaxf(m1, max4(b));
+    }
+    if (i < N4) m0 = fmaxf(m0, max4(in4[i])); // at most one leftover float4
+    float m = fmaxf(m0, m1);
     for (int j = (N4 << 2) + gtid; j < N; j += stride)
         m = fmaxf(m, input[j]);
 
