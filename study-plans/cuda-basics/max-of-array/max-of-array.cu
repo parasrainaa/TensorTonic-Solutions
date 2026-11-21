@@ -18,18 +18,30 @@ __inline__ __device__ float warpMax(float v) {
     return v;
 }
 
-__global__ void max_kernel(const float* input, float* result, int N) {
+__inline__ __device__ float max4(float4 v) {
+    return fmaxf(fmaxf(v.x, v.y), fmaxf(v.z, v.w));
+}
+
+__global__ void max_kernel(const float* __restrict__ input, float* result, int N) {
     __shared__ float warpMaxes[32];
     int tid  = threadIdx.x;
     int lane = tid & 31;
-    int warp = tid >> 5;                     
+    int warp = tid >> 5;
+    int gtid   = blockIdx.x * blockDim.x + tid;
+    int stride = blockDim.x * gridDim.x;
+
+    // Phase 1a: main body, 16 bytes per load
+    const float4* in4 = reinterpret_cast<const float4*>(input);
+    int N4 = N >> 2;
     float m = -FLT_MAX;
-    for (int i = blockDim.x * blockIdx.x + tid; i < N; i += blockDim.x * gridDim.x)
-        m = fmaxf(input[i], m);
+    for (int i = gtid; i < N4; i += stride)
+        m = fmaxf(m, max4(in4[i]));
+    for (int j = (N4 << 2) + gtid; j < N; j += stride)
+        m = fmaxf(m, input[j]);
 
     m = warpMax(m);
     if (lane == 0) warpMaxes[warp] = m;
-    __syncthreads();                         
+    __syncthreads();
     if (warp == 0) {
         int numWarps = blockDim.x / 32;
         m = (lane < numWarps) ? warpMaxes[lane] : -FLT_MAX;
@@ -40,7 +52,8 @@ __global__ void max_kernel(const float* input, float* result, int N) {
 
 extern "C" void solve(const float* input, float* result, int N) {
     int threads = 256;
-    int blocks = (N + threads - 1) / threads;
+    int work = (N + 3) / 4;                   
+    int blocks = (work + threads - 1) / threads;
     if (blocks > 160) blocks = 160;
     if (blocks < 1)   blocks = 1;
 
