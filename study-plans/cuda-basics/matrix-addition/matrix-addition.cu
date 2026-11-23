@@ -1,13 +1,11 @@
 #include <cuda_runtime.h>
 
 __global__ void matrix_add_kernel(const float* A, const float* B, float* C, int M, int N) {
-    // tid = threadIdx.x;
-    float sum = 0.f;
-    for(int i = 0;i < M;i++){
-        for(int j = 0;j < N;j++){
-            sum = A[i*N + j] + B[i*N + j];
-            C[i*N + j] = sum;
-        }
+    int col = blockIdx.x * blockDim.x + threadIdx.x;  
+    int row = blockIdx.y * blockDim.y + threadIdx.y;  
+    if (row < M && col < N) {
+        int idx = row * N + col;   
+        C[idx] = A[idx] + B[idx];
     }
 }
 
