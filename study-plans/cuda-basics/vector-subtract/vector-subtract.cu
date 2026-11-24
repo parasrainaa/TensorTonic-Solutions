@@ -24,7 +24,7 @@ __global__ void vector_sub(const float* A, const float* B, float* C, int N) {
 
 extern "C" void solve(const float* A, const float* B, float* C, int N) {
     int threads = 256;
-    int blocks = (N + threads - 1) / threads;
+    int blocks = N/4 +1;
     vector_sub<<<blocks, threads>>>(A, B, C, N);
     cudaDeviceSynchronize();
 }
