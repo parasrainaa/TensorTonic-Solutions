@@ -29,6 +29,7 @@ Verified machine learning implementations completed on [TensorTonic](https://www
 | Max of Array | Implement a multi-block CUDA maximum reduction that combines block-local maxima into one scalar output. | https://www.tensortonic.com/problems/max-of-array |
 | Min of Array | Implement a multi-block CUDA minimum reduction that combines block-local minima into one scalar output. | https://www.tensortonic.com/problems/min-of-array |
 | Sum of Array | Implement a multi-block CUDA sum reduction that combines partial block sums into one scalar output. | https://www.tensortonic.com/problems/sum-of-array |
+| Vector Subtraction | Implement bounds-checked pointwise vector subtraction in CUDA with one thread per output element. | https://www.tensortonic.com/problems/vector-subtract |
 
 View my verified ML profile: [TensorTonic profile](https://www.tensortonic.com/profile/parasraina2021)
 <!-- tensortonic:end -->
